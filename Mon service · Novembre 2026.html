@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon service · Novembre 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --desk:#F4F2F0; --page:#FFFFFF; --ink:#1F1A1B; --soft:#786B6C; --line:#ECE6E3;
+  --rose:#B4466F; --rose-wash:#F7E6EC;
+  --c-gs:#B4466F; --c-int:#1F1A1B; --c-lead:#6B4FA0; --c-pu:#8C2A45; --c-egl:#A39695;
+  --shadow:0 8px 22px rgba(20,16,17,.07);
+  --display:'Bodoni Moda',Didot,Georgia,serif; --ui:'Hanken Grotesk','Helvetica Neue',Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --desk:#070606; --page:#141111; --ink:#F5F1EE; --soft:#ABA2A1; --line:#2A2425;
+    --rose:#EE9DBB; --rose-wash:#2E2426; --c-gs:#EE9DBB; --c-int:#F5F1EE; --c-lead:#B9A3EA; --c-pu:#E07A98; --c-egl:#7D7372;
+    --shadow:0 8px 22px rgba(0,0,0,.5); }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--ui);font-size:15px}
+body{padding:calc(env(safe-area-inset-top,0px) + 16px) 14px calc(env(safe-area-inset-bottom,0px) + 40px)}
+.wrap{max-width:760px;margin:0 auto}
+header{text-align:center;margin:6px 0 14px}
+.kicker{font-size:11px;letter-spacing:3px;font-weight:700;color:var(--soft);text-transform:uppercase}
+h1{font-family:var(--display);font-weight:600;font-size:34px;margin:4px 0 0;letter-spacing:.3px}
+h1 em{color:var(--rose);font-style:italic}
+.tabs{display:flex;background:var(--page);border-radius:999px;padding:4px;box-shadow:var(--shadow);margin:0 auto 12px;max-width:320px}
+.tabs button{flex:1;border:0;background:transparent;font:600 14px var(--ui);color:var(--soft);padding:9px;border-radius:999px;cursor:pointer}
+.tabs button.on{background:var(--ink);color:var(--page)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--line);background:var(--page);color:var(--ink);font:600 13px var(--ui);padding:6px 12px;border-radius:999px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.chip.on{border-color:var(--ink)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.toggle{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--soft);margin:2px 4px 10px}
+.toggle label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.weeknav{display:flex;align-items:center;justify-content:space-between;background:var(--page);border-radius:16px;padding:10px 12px;box-shadow:var(--shadow);margin-bottom:10px}
+.weeknav button{border:0;background:var(--rose-wash);color:var(--rose);width:38px;height:38px;border-radius:12px;font-size:20px;font-weight:700;cursor:pointer}
+.weeknav button:disabled{opacity:.3;cursor:default}
+.wk{text-align:center}
+.wk b{font-family:var(--display);font-size:19px;font-weight:600}
+.wk small{display:block;color:var(--soft);font-size:12.5px;margin-top:2px}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--rose);border-radius:6px;transition:width .3s}
+.day{background:var(--page);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px;border-left:4px solid transparent}
+.day.today{border-left-color:var(--rose)}
+.dh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+.dh b{font-family:var(--display);font-size:18px;font-weight:600;text-transform:capitalize}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.5px;padding:2px 8px;border-radius:999px;background:var(--rose);color:var(--page)}
+.rdv{display:flex;gap:10px;align-items:flex-start;padding:5px 0;font-size:14px}
+.rdv .time{min-width:52px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--soft);font-size:13px;padding-top:1px}
+.rdv .dot{margin-top:6px}
+.rdv.fixed{color:var(--soft);font-size:13px}
+.task{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px dashed var(--line);cursor:pointer}
+.task:first-of-type{border-top:0}
+.box{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid var(--cc);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:background .15s}
+.task.done .box{background:var(--cc)}
+.task.done .box::after{content:"✓";color:var(--page);font-weight:800;font-size:13px}
+.task .txt{flex:1;font-size:14.5px;line-height:1.35}
+.task.done .txt{text-decoration:line-through;color:var(--soft)}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+.pill{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--soft)}
+.pill.confirm{border:1px dashed var(--rose);color:var(--rose)}
+.pill.deleg{background:var(--line);border-color:var(--line);color:var(--ink)}
+.sec{font-size:10.5px;letter-spacing:1.5px;font-weight:700;color:var(--soft);text-transform:uppercase;margin:8px 0 2px}
+.empty{color:var(--soft);font-size:13.5px;font-style:italic}
+.month .week{background:var(--page);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px}
+.month h3{font-family:var(--display);font-weight:600;font-size:18px;margin:0 0 2px;display:flex;justify-content:space-between;align-items:baseline}
+.month h3 small{font-family:var(--ui);font-size:12px;color:var(--soft);font-weight:600}
+.month .task .d{font-size:12px;color:var(--soft);font-weight:700;min-width:44px;padding-top:2px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stat{background:var(--page);border-radius:14px;box-shadow:var(--shadow);padding:10px;text-align:center}
+.stat b{display:block;font-family:var(--display);font-size:24px}
+.stat span{font-size:11.5px;color:var(--soft)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;font-size:12px;color:var(--soft);margin-top:14px}
+.legend span{display:flex;align-items:center;gap:5px}
+.save{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);background:var(--ink);color:var(--page);font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none}
+.save.show{opacity:.92}
+.fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:56px;height:56px;border-radius:50%;border:0;background:var(--rose);color:#fff;font-size:30px;line-height:1;box-shadow:0 10px 24px rgba(180,70,111,.4);cursor:pointer;z-index:5}
+.modal{position:fixed;inset:0;background:rgba(10,8,8,.45);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.modal.open{display:flex}
+.sheet{background:var(--page);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom,0px) + 18px)}
+.sheet h2{font-family:var(--display);font-weight:600;margin:0 0 12px;font-size:22px}
+.sheet label{display:block;font-size:12px;font-weight:700;color:var(--soft);letter-spacing:.5px;text-transform:uppercase;margin:10px 0 4px}
+.sheet input[type=text],.sheet input[type=date],.sheet input[type=time]{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--desk);color:var(--ink);font:500 15px var(--ui)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:0;border:1.5px solid var(--line);background:var(--desk);color:var(--ink);font:600 13px var(--ui);padding:9px 6px;border-radius:12px;cursor:pointer}
+.seg button.on{border-color:var(--ink);background:var(--ink);color:var(--page)}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.check{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px}
+.acts{display:flex;gap:10px;margin-top:16px}
+.acts button{flex:1;padding:13px;border-radius:14px;font:700 15px var(--ui);cursor:pointer;border:0}
+.acts .ok{background:var(--rose);color:#fff}.acts .no{background:var(--line);color:var(--ink)}
+.err{color:var(--rose);font-size:13px;margin-top:8px;min-height:16px}
+.del{border:0;background:transparent;color:var(--soft);font-size:16px;cursor:pointer;padding:0 2px;flex:none}
+.acts-i{display:flex;gap:2px;flex:none;align-items:flex-start}
+.ib{border:0;background:transparent;color:var(--soft);font-size:15px;cursor:pointer;padding:2px 4px;border-radius:8px}
+.ib:active{background:var(--line)}
+.ib.arm{color:#fff;background:var(--rose)}
+.pill.mine{border-style:solid;border-color:var(--rose-wash);background:var(--rose-wash);color:var(--rose)}
+.verse{text-align:center;font-family:var(--display);font-style:italic;color:var(--soft);font-size:14px;margin:18px 10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Église MFD Online</div>
+    <h1>Mon <em>service</em> 🖤</h1>
+    <div class="kicker" style="margin-top:4px">Novembre 2026</div>
+  </header>
+  <div class="tabs"><button id="tWeek">Semaine</button><button id="tMonth">Mois</button></div>
+  <div class="chips" id="chips"></div>
+  <div class="toggle">
+    <label><input type="checkbox" id="showFixed"> Afficher mes rendez-vous fixes (jeudi, dimanche)</label>
+  </div>
+  <div id="app"></div>
+  <div class="legend" id="legend"></div>
+  <p class="verse">« Marie a choisi la bonne part » · Luc 10:42</p>
+</div>
+<button class="fab" id="fab" aria-label="Ajouter">+</button>
+<div class="modal" id="modal"><div class="sheet">
+  <h2 id="ftitle">Ajouter</h2>
+  <div class="seg" id="kSeg"><button data-k="t" class="on">✓ Tâche</button><button data-k="r">📅 Rendez-vous</button></div>
+  <label>Quoi ?</label><input type="text" id="fx" placeholder="Ex. Appeler Maeva">
+  <div class="row"><div><label>Date</label><input type="date" id="fd" min="2026-11-01" max="2026-11-30"></div>
+  <div><label>Heure (facultatif)</label><input type="text" id="fh" placeholder="ex. 21:00"></div></div>
+  <label>Qui ? (vide = moi)</label><input type="text" id="fw" placeholder="Ex. Jonathan, Vanessa">
+  <label>Casquette</label>
+  <div class="seg" id="cSeg"><button data-c="gs" class="on">GS</button><button data-c="int">Intercession</button><button data-c="lead">Leaders</button><button data-c="pu">PU</button></div>
+  <label class="check"><input type="checkbox" id="fconf"> À confirmer</label>
+  <div class="err" id="ferr"></div>
+  <div class="acts"><button class="no" id="fcancel">Annuler</button><button class="ok" id="fok">Ajouter</button></div>
+</div></div>
+<div class="save" id="save">Enregistré ✓</div>
+
+<script type="application/json" id="state">{"ts":1794246792204,"done":{"s1-prog":true,"s1-sond":true,"s1-zoom":true,"s1-van":true,"s1-qui":true,"s2-intro":true},"custom":[{"id":"u-1794246707906","d":"11-11","k":"t","c":"lead","x":"Faire les consignes MDA relent","u":1}],"edits":{},"deleted":{}}</script>
+<script>
+const SRC = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+
+const CATS = {
+  gs:  {name:"Groupe de suivi", short:"GS", color:"var(--c-gs)"},
+  int: {name:"Intercession", short:"Intercession", color:"var(--c-int)"},
+  lead:{name:"Leaders MDA", short:"Leaders", color:"var(--c-lead)"},
+  pu:  {name:"PU", short:"PU", color:"var(--c-pu)"},
+  egl: {name:"Fixe", short:"Fixe", color:"var(--c-egl)"}
+};
+
+// k: r = rendez-vous, t = tâche · w: c = à confirmer, ou nom de la personne à qui c'est délégué
+const ITEMS = [
+  // Semaine 1
+  {id:"s1-prog", d:"11-03", k:"t", c:"gs", x:"Envoyer le programme de la semaine au GS"},
+  {id:"s1-sond", d:"11-03", k:"t", c:"int", x:"Sondage : horaire de la prière du samedi (fixé à 22h)", w:"Jonathan"},
+  {id:"s1-roles", d:"11-03", k:"t", c:"lead", x:"Répartir les rôles de la PU avec Nhauelly"},
+  {id:"s1-bilan", d:"11-03", k:"t", c:"lead", x:"Envoyer les 5 questions du bilan aux MDA (vers 19h)"},
+  {id:"r-0303", d:"11-03", k:"r", c:"lead", h:"avant", x:"Intercession leaders · 15 min avant la PU"},
+  {id:"r-0303b", d:"11-03", k:"r", c:"lead", h:"21:00", x:"PU MDA générale · tu conduis avec Nhauelly (bilan + speed dating)"},
+  {id:"s1-zoom", d:"11-04", k:"t", c:"gs", x:"Préparer le Zoom GS du vendredi 6"},
+  {id:"s1-van", d:"11-04", k:"t", c:"gs", x:"Valider le planning GS avec Vanessa + sa présence le 6"},
+  {id:"s1-ret", d:"11-04", k:"t", c:"int", x:"Retour sur l'enseignement de dimanche (pas fait)"},
+  {id:"s1-qui", d:"11-04", k:"t", c:"int", x:"Répartir les « Qui ? » du département avec Jonathan"},
+  {id:"r-0406", d:"11-06", k:"r", c:"gs", h:"20:30", x:"Zoom GS · Communion et échange ✓ fait"},
+  {id:"r-0407", d:"11-07", k:"r", c:"int", h:"22:00", x:"Prière de 10 min · département ✨ nouveau ✓ fait"},
+  // Semaine 2
+  {id:"s2-suj", d:"11-09", k:"t", c:"int", x:"Préparer les sujets d'intercession du mardi · avec Jonathan"},
+  {id:"s2-med", d:"11-09", k:"t", c:"gs", x:"Plan de méditation (enseignement du dimanche) + quiz prêts"},
+  {id:"s2-intro", d:"11-09", k:"t", c:"int", x:"Voir de vive voix avec Jonathan quand envoyer le sondage d'introspection"},
+  {id:"s2-prog", d:"11-10", k:"t", c:"gs", x:"Envoyer le programme de la semaine + méditation et quiz dans le GS"},
+  {id:"s2-dispo", d:"11-10", k:"t", c:"gs", x:"Vérifier les dispos du GS pour 21h30 vendredi 13"},
+  {id:"r-1010", d:"11-10", k:"r", c:"lead", h:"avant", x:"Intercession leaders · 15 min avant la PU"},
+  {id:"r-1010b", d:"11-10", k:"r", c:"int", h:"21:00", x:"Intercession pour l'église · avec Jonathan"},
+  {id:"s2-deo", d:"11-11", k:"t", c:"int", x:"Envoyer l'enseignement du Pasteur Déodat (partie 1)", w:"Jonathan"},
+  {id:"s2-zoom", d:"11-11", k:"t", c:"gs", x:"Préparer le Zoom GS du 13 (lecture et méditation sur le réveil personnel)"},
+  {id:"s2-retenu", d:"11-13", k:"t", c:"int", x:"Demander ce qu'ils ont retenu de l'enseignement", w:"Jonathan"},
+  {id:"r-1313b", d:"11-13", k:"r", c:"gs", h:"21:15", x:"Prière avec Vanessa (10 min) · organisation du GS"},
+  {id:"r-1313", d:"11-13", k:"r", c:"gs", h:"21:30", x:"Zoom GS · Lecture et méditation sur le réveil personnel (1h) · dispos à vérifier"},
+  {id:"s2-vim", d:"11-14", k:"t", c:"gs", x:"Choisir l'enseignement Vimeo + les sujets de débat"},
+  {id:"r-1515", d:"11-15", k:"r", c:"pu", h:"", x:"Débrief du dimanche · c'est toi qui conduis"},
+  // Semaine 3
+  {id:"s3-prog", d:"11-17", k:"t", c:"gs", x:"Envoyer le Vimeo + débat et le programme de la semaine au GS"},
+  {id:"s3-nouv", d:"11-17", k:"t", c:"int", x:"Prendre des nouvelles + échanger sur l'enseignement de dimanche"},
+  {id:"r-1717", d:"11-17", k:"r", c:"lead", h:"avant", x:"Intercession leaders · 15 min avant la PU"},
+  {id:"r-1717b", d:"11-17", k:"r", c:"lead", h:"21:00", x:"PU MDA générale (Eunice & Maëlys)"},
+  {id:"s3-deo", d:"11-18", k:"t", c:"int", x:"Envoyer l'enseignement du Pasteur Déodat (partie 2)", w:"Jonathan"},
+  {id:"s3-suj", d:"11-18", k:"t", c:"gs", x:"Préparer les sujets d'intercession du Zoom du 20", w:"Vanessa"},
+  {id:"s3-ret", d:"11-20", k:"t", c:"int", x:"Retour sur l'enseignement du Pasteur Déodat", w:"Jonathan"},
+  {id:"r-2020", d:"11-20", k:"r", c:"gs", h:"20:30", x:"Zoom GS · Intercession : sujets des membres + réveil (30 min) · Vanessa"},
+  {id:"r-2121", d:"11-21", k:"r", c:"int", h:"22:00", x:"Prière de 10 min · département · tu conduis"},
+  // Semaine 4
+  {id:"s4-suj", d:"11-23", k:"t", c:"int", x:"Préparer les sujets d'intercession du mardi · avec Jonathan"},
+  {id:"s4-vlog", d:"11-23", k:"t", c:"gs", x:"Idée du vlog « a day in my life » + bilan du mois prête", w:"Vanessa"},
+  {id:"s4-prog", d:"11-24", k:"t", c:"gs", x:"Programme de la semaine dans le GS (vlog de Vanessa)", w:"c"},
+  {id:"r-2424", d:"11-24", k:"r", c:"lead", h:"", x:"Jeûne + réunion d'organisation des leaders"},
+  {id:"r-2424b", d:"11-24", k:"r", c:"int", h:"21:00", x:"Intercession pour l'église · Jonathan conduit"},
+  {id:"s4-ret", d:"11-25", k:"t", c:"int", x:"Retour sur l'enseignement de dimanche", w:"Jonathan"},
+  {id:"s4-zoom", d:"11-25", k:"t", c:"gs", x:"Préparer le Zoom GS du 27 (bilan + préparation de décembre)"},
+  {id:"s4-nouv", d:"11-27", k:"t", c:"int", x:"Prendre des nouvelles du département"},
+  {id:"r-2727", d:"11-27", k:"r", c:"gs", h:"20:30", x:"Zoom GS · Bilan du mois + préparation de décembre"},
+  {id:"r-2727b", d:"11-27", k:"r", c:"gs", h:"", x:"10 min d'intercession avec Vanessa · sujets des suivies"},
+  {id:"s4-pu", d:"11-29", k:"t", c:"pu", x:"Faire le planning PU de décembre (20h)"},
+  // Semaine 5
+  {id:"s5-dec", d:"11-30", k:"t", c:"int", x:"Programme du département de décembre (avec Jonathan)"}
+];
+
+// Rendez-vous fixes
+for (let day = 1; day <= 30; day++){
+  const dt = new Date(2026, 10, day), wd = dt.getDay(), d = "11-" + String(day).padStart(2,"0");
+  if (wd === 4){
+    ITEMS.push({id:"f-j"+day, d, k:"r", c:"egl", h:"journée", x:"Jeûne", fixed:1});
+    ITEMS.push({id:"f-p"+day, d, k:"r", c:"egl", h:"19:30", x:"Pré-culte", fixed:1});
+    ITEMS.push({id:"f-c"+day, d, k:"r", c:"egl", h:"20:00", x:"Culte online", fixed:1});
+  }
+  if (wd === 0){
+    ITEMS.push({id:"f-a"+day, d, k:"r", c:"egl", h:"08:00", x:"PU", fixed:1});
+    ITEMS.push({id:"f-b"+day, d, k:"r", c:"egl", h:"08:45", x:"PU", fixed:1});
+    ITEMS.push({id:"f-m"+day, d, k:"r", c:"egl", h:"09:30", x:"MFD online", fixed:1});
+    ITEMS.push({id:"f-f"+day, d, k:"r", c:"egl", h:"aprèm", x:"En famille 🏡", fixed:1});
+  }
+}
+
+const WEEKS = [
+  {n:1, from:2, to:8}, {n:2, from:9, to:15}, {n:3, from:16, to:22}, {n:4, from:23, to:29}, {n:5, from:30, to:30}
+];
+const DAYNAMES = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+
+// ---- État ----
+let state = {ts:0, done:{}};
+try { state = JSON.parse(document.getElementById("state").textContent); } catch(e){}
+try {
+  const local = JSON.parse(localStorage.getItem("monservice-nov26") || "null");
+  if (local && local.ts > state.ts) state = local;
+} catch(e){}
+if (!Array.isArray(state.custom)) state.custom = [];
+if (!state.edits || typeof state.edits !== "object") state.edits = {};
+if (!state.deleted || typeof state.deleted !== "object") state.deleted = {};
+function allItems(){
+  return ITEMS.filter(it => !state.deleted[it.id]).map(it => state.edits[it.id] ? Object.assign({}, it, state.edits[it.id]) : it).concat(state.custom);
+}
+function findItem(id){ return allItems().find(i => i.id === id); }
+function btns(it){ return it.fixed ? "" : '<span class="acts-i"><button class="ib" data-edit="' + it.id + '" aria-label="Modifier">✏️</button><button class="ib" data-del="' + it.id + '" aria-label="Supprimer">✕</button></span>'; }
+let ui = {view:"week", week:null, filter:"all", fixed:false};
+try { Object.assign(ui, JSON.parse(localStorage.getItem("monservice-ui") || "{}")); } catch(e){}
+
+const today = new Date();
+const isNov = today.getFullYear() === 2026 && today.getMonth() === 10;
+const todayD = isNov ? "11-" + String(today.getDate()).padStart(2,"0") : null;
+if (!ui.week){
+  ui.week = 1;
+  if (isNov) WEEKS.forEach(w => { if (today.getDate() >= w.from && today.getDate() <= w.to) ui.week = w.n; });
+}
+const h = location.hash.slice(1);
+if (h === "mois") ui.view = "month";
+else if (/^semaine-[1-5]$/.test(h)) { ui.view = "week"; ui.week = +h.slice(-1); }
+
+function saveUI(){
+  try { localStorage.setItem("monservice-ui", JSON.stringify(ui)); } catch(e){}
+  try { history.replaceState(null, "", "#" + (ui.view === "month" ? "mois" : "semaine-" + ui.week)); } catch(e){}
+}
+
+// ---- Enregistrement ----
+let artifactApi = null, pending = null;
+if (window.claude && claude.use) claude.use("artifact").then(a => { artifactApi = a; }).catch(()=>{});
+function flash(msg){ const s = document.getElementById("save"); s.textContent = msg; s.classList.add("show"); clearTimeout(flash.t); flash.t = setTimeout(()=>s.classList.remove("show"), 1400); }
+function persist(){
+  state.ts = Date.now();
+  try { localStorage.setItem("monservice-nov26", JSON.stringify(state)); } catch(e){}
+  flash("Enregistré ✓");
+  if (!artifactApi) return;
+  clearTimeout(pending);
+  pending = setTimeout(async () => {
+    const json = JSON.stringify(state).replace(/</g, "\\u003c");
+    const html = SRC.replace(/(<script type="application\/json" id="state">)[\s\S]*?(<\/script>)/, "$1" + json + "$2");
+    try { await artifactApi.publish(html); } catch(e){}
+  }, 2500);
+}
+
+// ---- Rendu ----
+const $ = id => document.getElementById(id);
+function visible(it){
+  if (it.fixed && !ui.fixed) return false;
+  if (ui.filter !== "all" && it.c !== ui.filter && !(it.fixed && ui.fixed)) return false;
+  return true;
+}
+function esc(s){ return s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function pills(it){
+  let p = "";
+  if (it.w === "c") p += '<span class="pill confirm">à confirmer</span>';
+  else if (it.w) p += '<span class="pill deleg">' + esc(it.w) + '</span>';
+  if (it.u) p += '<span class="pill mine">ajouté</span>';
+  p += '<span class="pill" style="color:' + CATS[it.c].color + '">' + CATS[it.c].short + '</span>';
+  return '<div class="meta">' + p + '</div>';
+}
+function taskHTML(it, withDate){
+  const done = !!state.done[it.id];
+  const dlabel = withDate ? '<span class="d">' + dayShort(it.d) + '</span>' : "";
+  return '<div class="task' + (done ? " done" : "") + '" data-id="' + it.id + '" style="--cc:' + CATS[it.c].color + '">' +
+    dlabel + '<span class="box"></span><div class="txt">' + (it.h ? '<b>' + esc(it.h) + '</b> · ' : '') + esc(it.x) + pills(it) + '</div>' + btns(it) + '</div>';
+}
+function dayShort(d){ const n = +d.slice(3); return DAYNAMES[new Date(2026,10,n).getDay()].slice(0,3) + " " + n; }
+
+function renderChips(){
+  const opts = [["all","Tout",null]].concat(["gs","int","lead","pu"].map(k => [k, CATS[k].name, CATS[k].color]));
+  $("chips").innerHTML = opts.map(([k,n,c]) =>
+    '<button class="chip' + (ui.filter === k ? " on" : "") + '" data-f="' + k + '">' + (c ? '<span class="dot" style="background:' + c + '"></span>' : "") + n + '</button>').join("");
+  $("legend").innerHTML = ["gs","int","lead","pu","egl"].map(k => '<span><i class="dot" style="background:' + CATS[k].color + '"></i>' + CATS[k].name + '</span>').join("");
+}
+
+function renderWeek(){
+  const w = WEEKS[ui.week - 1];
+  const tasks = allItems().filter(it => it.k === "t" && +it.d.slice(3) >= w.from && +it.d.slice(3) <= w.to && visible(it));
+  const done = tasks.filter(t => state.done[t.id]).length;
+  const label = w.from === w.to ? "Lundi 30 novembre" : "Du " + w.from + " au " + w.to + " novembre";
+  let out = '<div class="weeknav"><button id="prev"' + (ui.week === 1 ? " disabled" : "") + '>‹</button>' +
+    '<div class="wk"><b>Semaine ' + w.n + '</b><small>' + label + ' · ' + done + '/' + tasks.length + ' tâches faites</small>' +
+    '<div class="bar"><i style="width:' + (tasks.length ? Math.round(done/tasks.length*100) : 0) + '%"></i></div></div>' +
+    '<button id="next"' + (ui.week === 5 ? " disabled" : "") + '>›</button></div>';
+  for (let n = w.from; n <= w.to; n++){
+    const d = "11-" + String(n).padStart(2,"0");
+    const dt = new Date(2026,10,n), wd = dt.getDay();
+    const rdv = allItems().filter(it => it.d === d && it.k === "r" && visible(it));
+    const tk = allItems().filter(it => it.d === d && it.k === "t" && visible(it));
+    out += '<div class="day' + (d === todayD ? " today" : "") + '"><div class="dh"><b>' + DAYNAMES[wd] + ' ' + n + '</b>' +
+      (d === todayD ? '<span class="tag">AUJOURD\'HUI</span>' : "") + '</div>';
+    const hasFixed = ITEMS.some(it => it.d === d && it.fixed);
+    if (!rdv.length && !tk.length) out += '<div class="empty">' + (hasFixed && !ui.fixed ? (wd === 4 ? "Jeûne, pré-culte et culte seulement 🖤" : "PU, MFD, puis l'après-midi en famille 🏡") : "Rien de prévu · temps de repos 🌿") + '</div>';
+    if (rdv.length){
+      out += '<div class="sec">Rendez-vous</div>';
+      rdv.forEach(r => { out += '<div class="rdv' + (r.fixed ? " fixed" : "") + '"><span class="time">' + (r.h || "") + '</span><span class="dot" style="background:' + CATS[r.c].color + '"></span><span style="flex:1">' + esc(r.x) + (r.u ? ' <span class="pill mine">ajouté</span>' : '') + '</span>' + btns(r) + '</div>'; });
+    }
+    if (tk.length){
+      out += '<div class="sec">À faire</div>';
+      tk.forEach(t => out += taskHTML(t, false));
+    }
+    out += '</div>';
+  }
+  return out;
+}
+
+function renderMonth(){
+  const all = allItems().filter(it => it.k === "t" && visible(it));
+  const mine = all.filter(t => !(t.w && t.w !== "c"));
+  const done = mine.filter(t => state.done[t.id]).length;
+  const conf = mine.filter(t => t.w === "c" && !state.done[t.id]).length;
+  let out = '<div class="stats"><div class="stat"><b>' + done + '/' + mine.length + '</b><span>tâches faites</span></div>' +
+    '<div class="stat"><b>' + (mine.length - done) + '</b><span>restantes</span></div>' +
+    '<div class="stat"><b style="color:var(--rose)">' + conf + '</b><span>à confirmer</span></div></div>';
+  out += '<div class="month">';
+  WEEKS.forEach(w => {
+    const tk = all.filter(t => +t.d.slice(3) >= w.from && +t.d.slice(3) <= w.to);
+    if (!tk.length) return;
+    const dn = tk.filter(t => state.done[t.id]).length;
+    out += '<div class="week"><h3>Semaine ' + w.n + '<small>' + dn + '/' + tk.length + '</small></h3>';
+    tk.forEach(t => out += taskHTML(t, true));
+    out += '</div>';
+  });
+  return out + '</div>';
+}
+
+function render(){
+  $("tWeek").classList.toggle("on", ui.view === "week");
+  $("tMonth").classList.toggle("on", ui.view === "month");
+  $("showFixed").checked = ui.fixed;
+  renderChips();
+  $("app").innerHTML = ui.view === "week" ? renderWeek() : renderMonth();
+  saveUI();
+}
+
+document.addEventListener("click", e => {
+  const del = e.target.closest("[data-del]");
+  if (del){ e.stopPropagation(); askDelete(del.dataset.del, del); return; }
+  const ed = e.target.closest("[data-edit]");
+  if (ed){ e.stopPropagation(); openForm(ed.dataset.edit); return; }
+  const t = e.target.closest(".task");
+  if (t){ const id = t.dataset.id; if (state.done[id]) delete state.done[id]; else state.done[id] = true; render(); persist(); return; }
+  const f = e.target.closest(".chip");
+  if (f){ ui.filter = f.dataset.f; render(); return; }
+  if (e.target.id === "prev" && ui.week > 1){ ui.week--; render(); window.scrollTo({top:0}); }
+  if (e.target.id === "next" && ui.week < 5){ ui.week++; render(); window.scrollTo({top:0}); }
+});
+$("tWeek").onclick = () => { ui.view = "week"; render(); };
+$("tMonth").onclick = () => { ui.view = "month"; render(); };
+$("showFixed").onchange = e => { ui.fixed = e.target.checked; render(); };
+window.addEventListener("hashchange", () => {
+  const h = location.hash.slice(1);
+  if (h === "mois") ui.view = "month"; else if (/^semaine-[1-5]$/.test(h)) { ui.view = "week"; ui.week = +h.slice(-1); }
+  render();
+});
+// ---- Ajout manuel ----
+let fk = "t", fc = "gs", pendingDel = null, editId = null;
+function openForm(id){
+  editId = (typeof id === "string") ? id : null;
+  $("ferr").textContent = "";
+  if (editId){
+    const it = findItem(editId); if (!it) return;
+    fk = it.k; fc = it.c;
+    $("fx").value = it.x; $("fh").value = it.h || ""; $("fd").value = "2026-" + it.d;
+    $("fconf").checked = it.w === "c"; $("fw").value = (it.w && it.w !== "c") ? it.w : "";
+    $("ftitle").textContent = "Modifier"; $("fok").textContent = "Enregistrer";
+  } else {
+    fk = "t"; fc = ui.filter !== "all" ? ui.filter : "gs";
+    $("fx").value = ""; $("fh").value = ""; $("fw").value = ""; $("fconf").checked = false;
+    const w = WEEKS[ui.week - 1];
+    let def = w.from;
+    if (isNov && today.getDate() >= w.from && today.getDate() <= w.to) def = today.getDate();
+    $("fd").value = "2026-11-" + String(def).padStart(2,"0");
+    $("ftitle").textContent = "Ajouter"; $("fok").textContent = "Ajouter";
+  }
+  syncSeg(); $("modal").classList.add("open"); setTimeout(()=>$("fx").focus(), 50);
+}
+function syncSeg(){
+  document.querySelectorAll("#kSeg button").forEach(b => b.classList.toggle("on", b.dataset.k === fk));
+  document.querySelectorAll("#cSeg button").forEach(b => b.classList.toggle("on", b.dataset.c === fc));
+}
+$("fab").onclick = () => openForm();
+$("fcancel").onclick = () => $("modal").classList.remove("open");
+$("modal").onclick = e => { if (e.target.id === "modal") $("modal").classList.remove("open"); };
+$("kSeg").onclick = e => { const b = e.target.closest("button"); if (b){ fk = b.dataset.k; syncSeg(); } };
+$("cSeg").onclick = e => { const b = e.target.closest("button"); if (b){ fc = b.dataset.c; syncSeg(); } };
+$("fok").onclick = () => {
+  const x = $("fx").value.trim(), dv = $("fd").value;
+  if (!x){ $("ferr").textContent = "Écris ce que tu veux ajouter."; return; }
+  if (!/^2026-11-\d\d$/.test(dv)){ $("ferr").textContent = "Choisis une date en novembre."; return; }
+  const d = dv.slice(5), hv = $("fh").value.trim(), wv = $("fw").value.trim();
+  const w = $("fconf").checked ? "c" : (wv || "");
+  if (editId){
+    const patch = {d, k:fk, c:fc, x, h:hv, w};
+    const cu = state.custom.find(i => i.id === editId);
+    if (cu) Object.assign(cu, patch); else state.edits[editId] = patch;
+  } else {
+    const it = {id:"u-" + Date.now(), d, k:fk, c:fc, x, u:1};
+    if (hv) it.h = hv;
+    if (w) it.w = w;
+    state.custom.push(it);
+  }
+  const n = +d.slice(3); WEEKS.forEach(w => { if (n >= w.from && n <= w.to) ui.week = w.n; });
+  $("modal").classList.remove("open"); render(); persist();
+};
+function askDelete(id, btn){
+  if (pendingDel === id){
+    if (state.custom.some(i => i.id === id)) state.custom = state.custom.filter(i => i.id !== id);
+    else state.deleted[id] = true;
+    delete state.done[id]; delete state.edits[id]; pendingDel = null; render(); persist(); return;
+  }
+  pendingDel = id; if (btn) btn.classList.add("arm"); flash("Appuie encore sur ✕ pour supprimer");
+  setTimeout(() => { if (pendingDel === id){ pendingDel = null; render(); } }, 3000);
+}
+render();
+</script>
+</body>
+</html>
