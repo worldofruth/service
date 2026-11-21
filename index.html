@@ -2,8 +2,12 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<link rel="apple-touch-icon" href="icone.png">
+<link rel="icon" type="image/png" href="icone.png">
+<meta name="apple-mobile-web-app-title" content="Mon service">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mon service · Novembre 2026</title>
+<title>Mon service</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
 <style>
@@ -102,259 +106,402 @@ h1 em{color:var(--rose);font-style:italic}
 .ib.arm{color:#fff;background:var(--rose)}
 .pill.mine{border-style:solid;border-color:var(--rose-wash);background:var(--rose-wash);color:var(--rose)}
 .verse{text-align:center;font-family:var(--display);font-style:italic;color:var(--soft);font-size:14px;margin:18px 10px 0}
+.monthnav{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px}
+.monthnav button{border:0;background:var(--rose-wash);color:var(--rose);width:30px;height:30px;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer}
+.monthnav .kicker{min-width:150px}
+.mnow{display:none;border:0;background:transparent;color:var(--rose);font:600 12px var(--ui);cursor:pointer;margin:2px auto 0;padding:2px 8px}
+.mnow.show{display:block}
+[hidden]{display:none!important}
+details.bk{background:var(--page);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;margin-top:14px}
+details.bk summary{font-family:var(--display);font-weight:600;font-size:18px;cursor:pointer}
+.bk-note{font-size:13px;color:var(--soft);margin:10px 0 0;line-height:1.4}
+.bkb{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.bkb button,#bk-yes{flex:1;min-width:120px;padding:11px;border-radius:12px;border:0;font:700 13.5px var(--ui);cursor:pointer;background:var(--rose);color:#fff}
+.bkb button.g{background:var(--line);color:var(--ink)}
+details.bk label{display:block;font-size:12px;font-weight:700;color:var(--soft);letter-spacing:.5px;text-transform:uppercase;margin:14px 0 4px}
+details.bk input[type=text]{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--desk);color:var(--ink);font:500 15px var(--ui)}
+.bk-msg{font-size:14px;color:var(--rose);min-height:1em;margin:10px 0 0}
+
+.save{white-space:nowrap}
+.dh .right{display:flex;align-items:center;gap:6px}
+.addday{border:0;background:var(--rose-wash);color:var(--rose);width:26px;height:26px;border-radius:9px;font-size:17px;font-weight:700;line-height:1;cursor:pointer;padding:0}
+.day{scroll-margin-top:12px}
+.pill.carry{border-style:dashed;color:var(--rose);border-color:var(--rose)}
+.pill.rec{border-color:var(--line);color:var(--soft)}
+.rdv .pill{margin-left:4px;font-size:10px}
+.month h3.go{cursor:pointer}
+.month h3.go small::after{content:" ›"}
+#frepHint{font-size:12.5px;color:var(--soft);margin:4px 0 0 28px;line-height:1.35}
+details.bk summary small{font-family:var(--ui);font-size:12px;font-weight:600;color:var(--soft);margin-left:6px}
+details.bk summary small.warn{color:var(--rose)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="kicker">Église MFD Online</div>
+    <div class="kicker" id="eglise" hidden></div>
     <h1>Mon <em>service</em> 🖤</h1>
-    <div class="kicker" style="margin-top:4px">Novembre 2026</div>
+    <div class="monthnav">
+      <button id="mprev" aria-label="Mois précédent">‹</button>
+      <div class="kicker" id="mlabel"></div>
+      <button id="mnext" aria-label="Mois suivant">›</button>
+    </div>
+    <button class="mnow" id="mnow">Revenir à aujourd'hui</button>
   </header>
   <div class="tabs"><button id="tWeek">Semaine</button><button id="tMonth">Mois</button></div>
   <div class="chips" id="chips"></div>
-  <div class="toggle">
-    <label><input type="checkbox" id="showFixed"> Afficher mes rendez-vous fixes (jeudi, dimanche)</label>
+  <div class="toggle" id="fixBox" hidden>
+    <label><input type="checkbox" id="showFixed"> <span id="fixLab">Afficher mes rendez-vous fixes</span></label>
   </div>
   <div id="app"></div>
   <div class="legend" id="legend"></div>
-  <p class="verse">« Marie a choisi la bonne part » · Luc 10:42</p>
+  <p class="verse" id="verse">« Marie a choisi la bonne part » · Luc 10:42</p>
+  <details class="bk" id="backup">
+    <summary>Ma sauvegarde <small id="bk-when"></small></summary>
+    <p class="bk-note">Tes coches, tes ajouts et tes tâches qui se répètent sont gardés sur cet appareil. Télécharge une sauvegarde chaque semaine, et toujours avant de supprimer l'icône de l'écran d'accueil.</p>
+    <div class="bkb"><button type="button" id="bk-dl">Télécharger</button><button type="button" class="g" id="bk-cp">Copier</button><button type="button" class="g" id="bk-file-btn">Restaurer un fichier</button><button type="button" class="g" id="ct-btn">Ouvrir mon fichier de contenu</button></div>
+    <input type="file" id="bk-file" accept=".json,application/json,text/plain" hidden>
+    <input type="file" id="ct-file" accept=".json,application/json,text/plain" hidden>
+    <label>Ou colle une sauvegarde copiée</label>
+    <input type="text" id="bk-text" autocomplete="off" placeholder="Colle ici, puis « Restaurer le texte »">
+    <div class="bkb"><button type="button" class="g" id="bk-restore">Restaurer le texte</button></div>
+    <p class="bk-msg" id="bk-msg" aria-live="polite"></p>
+  </details>
 </div>
 <button class="fab" id="fab" aria-label="Ajouter">+</button>
 <div class="modal" id="modal"><div class="sheet">
   <h2 id="ftitle">Ajouter</h2>
   <div class="seg" id="kSeg"><button data-k="t" class="on">✓ Tâche</button><button data-k="r">📅 Rendez-vous</button></div>
-  <label>Quoi ?</label><input type="text" id="fx" placeholder="Ex. Appeler Maeva">
-  <div class="row"><div><label>Date</label><input type="date" id="fd" min="2026-11-01" max="2026-11-30"></div>
+  <label>Quoi ?</label><input type="text" id="fx" placeholder="Ex. Appeler quelqu'un">
+  <div class="row"><div><label>Date</label><input type="date" id="fd"></div>
   <div><label>Heure (facultatif)</label><input type="text" id="fh" placeholder="ex. 21:00"></div></div>
-  <label>Qui ? (vide = moi)</label><input type="text" id="fw" placeholder="Ex. Jonathan, Vanessa">
+  <label>Qui ? (vide = moi)</label><input type="text" id="fw" placeholder="Ex. un prénom">
   <label>Casquette</label>
-  <div class="seg" id="cSeg"><button data-c="gs" class="on">GS</button><button data-c="int">Intercession</button><button data-c="lead">Leaders</button><button data-c="pu">PU</button></div>
+  <div class="seg" id="cSeg"></div>
   <label class="check"><input type="checkbox" id="fconf"> À confirmer</label>
+  <label class="check"><input type="checkbox" id="frep"> Répéter chaque semaine (même jour)</label>
+  <p id="frepHint" hidden>Ce que tu changes s'applique à ce jour et aux semaines suivantes. Décoche pour arrêter la répétition à partir de ce jour.</p>
   <div class="err" id="ferr"></div>
   <div class="acts"><button class="no" id="fcancel">Annuler</button><button class="ok" id="fok">Ajouter</button></div>
 </div></div>
 <div class="save" id="save">Enregistré ✓</div>
 
-<script type="application/json" id="state">{"ts":1794246792204,"done":{"s1-prog":true,"s1-sond":true,"s1-zoom":true,"s1-van":true,"s1-qui":true,"s2-intro":true},"custom":[{"id":"u-1794246707906","d":"11-11","k":"t","c":"lead","x":"Faire les consignes MDA relent","u":1}],"edits":{},"deleted":{}}</script>
 <script>
-const SRC = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-
-const CATS = {
-  gs:  {name:"Groupe de suivi", short:"GS", color:"var(--c-gs)"},
-  int: {name:"Intercession", short:"Intercession", color:"var(--c-int)"},
-  lead:{name:"Leaders MDA", short:"Leaders", color:"var(--c-lead)"},
-  pu:  {name:"PU", short:"PU", color:"var(--c-pu)"},
-  egl: {name:"Fixe", short:"Fixe", color:"var(--c-egl)"}
-};
-
-// k: r = rendez-vous, t = tâche · w: c = à confirmer, ou nom de la personne à qui c'est délégué
-const ITEMS = [
-  // Semaine 1
-  {id:"s1-prog", d:"11-03", k:"t", c:"gs", x:"Envoyer le programme de la semaine au GS"},
-  {id:"s1-sond", d:"11-03", k:"t", c:"int", x:"Sondage : horaire de la prière du samedi (fixé à 22h)", w:"Jonathan"},
-  {id:"s1-roles", d:"11-03", k:"t", c:"lead", x:"Répartir les rôles de la PU avec Nhauelly"},
-  {id:"s1-bilan", d:"11-03", k:"t", c:"lead", x:"Envoyer les 5 questions du bilan aux MDA (vers 19h)"},
-  {id:"r-0303", d:"11-03", k:"r", c:"lead", h:"avant", x:"Intercession leaders · 15 min avant la PU"},
-  {id:"r-0303b", d:"11-03", k:"r", c:"lead", h:"21:00", x:"PU MDA générale · tu conduis avec Nhauelly (bilan + speed dating)"},
-  {id:"s1-zoom", d:"11-04", k:"t", c:"gs", x:"Préparer le Zoom GS du vendredi 6"},
-  {id:"s1-van", d:"11-04", k:"t", c:"gs", x:"Valider le planning GS avec Vanessa + sa présence le 6"},
-  {id:"s1-ret", d:"11-04", k:"t", c:"int", x:"Retour sur l'enseignement de dimanche (pas fait)"},
-  {id:"s1-qui", d:"11-04", k:"t", c:"int", x:"Répartir les « Qui ? » du département avec Jonathan"},
-  {id:"r-0406", d:"11-06", k:"r", c:"gs", h:"20:30", x:"Zoom GS · Communion et échange ✓ fait"},
-  {id:"r-0407", d:"11-07", k:"r", c:"int", h:"22:00", x:"Prière de 10 min · département ✨ nouveau ✓ fait"},
-  // Semaine 2
-  {id:"s2-suj", d:"11-09", k:"t", c:"int", x:"Préparer les sujets d'intercession du mardi · avec Jonathan"},
-  {id:"s2-med", d:"11-09", k:"t", c:"gs", x:"Plan de méditation (enseignement du dimanche) + quiz prêts"},
-  {id:"s2-intro", d:"11-09", k:"t", c:"int", x:"Voir de vive voix avec Jonathan quand envoyer le sondage d'introspection"},
-  {id:"s2-prog", d:"11-10", k:"t", c:"gs", x:"Envoyer le programme de la semaine + méditation et quiz dans le GS"},
-  {id:"s2-dispo", d:"11-10", k:"t", c:"gs", x:"Vérifier les dispos du GS pour 21h30 vendredi 13"},
-  {id:"r-1010", d:"11-10", k:"r", c:"lead", h:"avant", x:"Intercession leaders · 15 min avant la PU"},
-  {id:"r-1010b", d:"11-10", k:"r", c:"int", h:"21:00", x:"Intercession pour l'église · avec Jonathan"},
-  {id:"s2-deo", d:"11-11", k:"t", c:"int", x:"Envoyer l'enseignement du Pasteur Déodat (partie 1)", w:"Jonathan"},
-  {id:"s2-zoom", d:"11-11", k:"t", c:"gs", x:"Préparer le Zoom GS du 13 (lecture et méditation sur le réveil personnel)"},
-  {id:"s2-retenu", d:"11-13", k:"t", c:"int", x:"Demander ce qu'ils ont retenu de l'enseignement", w:"Jonathan"},
-  {id:"r-1313b", d:"11-13", k:"r", c:"gs", h:"21:15", x:"Prière avec Vanessa (10 min) · organisation du GS"},
-  {id:"r-1313", d:"11-13", k:"r", c:"gs", h:"21:30", x:"Zoom GS · Lecture et méditation sur le réveil personnel (1h) · dispos à vérifier"},
-  {id:"s2-vim", d:"11-14", k:"t", c:"gs", x:"Choisir l'enseignement Vimeo + les sujets de débat"},
-  {id:"r-1515", d:"11-15", k:"r", c:"pu", h:"", x:"Débrief du dimanche · c'est toi qui conduis"},
-  // Semaine 3
-  {id:"s3-prog", d:"11-17", k:"t", c:"gs", x:"Envoyer le Vimeo + débat et le programme de la semaine au GS"},
-  {id:"s3-nouv", d:"11-17", k:"t", c:"int", x:"Prendre des nouvelles + échanger sur l'enseignement de dimanche"},
-  {id:"r-1717", d:"11-17", k:"r", c:"lead", h:"avant", x:"Intercession leaders · 15 min avant la PU"},
-  {id:"r-1717b", d:"11-17", k:"r", c:"lead", h:"21:00", x:"PU MDA générale (Eunice & Maëlys)"},
-  {id:"s3-deo", d:"11-18", k:"t", c:"int", x:"Envoyer l'enseignement du Pasteur Déodat (partie 2)", w:"Jonathan"},
-  {id:"s3-suj", d:"11-18", k:"t", c:"gs", x:"Préparer les sujets d'intercession du Zoom du 20", w:"Vanessa"},
-  {id:"s3-ret", d:"11-20", k:"t", c:"int", x:"Retour sur l'enseignement du Pasteur Déodat", w:"Jonathan"},
-  {id:"r-2020", d:"11-20", k:"r", c:"gs", h:"20:30", x:"Zoom GS · Intercession : sujets des membres + réveil (30 min) · Vanessa"},
-  {id:"r-2121", d:"11-21", k:"r", c:"int", h:"22:00", x:"Prière de 10 min · département · tu conduis"},
-  // Semaine 4
-  {id:"s4-suj", d:"11-23", k:"t", c:"int", x:"Préparer les sujets d'intercession du mardi · avec Jonathan"},
-  {id:"s4-vlog", d:"11-23", k:"t", c:"gs", x:"Idée du vlog « a day in my life » + bilan du mois prête", w:"Vanessa"},
-  {id:"s4-prog", d:"11-24", k:"t", c:"gs", x:"Programme de la semaine dans le GS (vlog de Vanessa)", w:"c"},
-  {id:"r-2424", d:"11-24", k:"r", c:"lead", h:"", x:"Jeûne + réunion d'organisation des leaders"},
-  {id:"r-2424b", d:"11-24", k:"r", c:"int", h:"21:00", x:"Intercession pour l'église · Jonathan conduit"},
-  {id:"s4-ret", d:"11-25", k:"t", c:"int", x:"Retour sur l'enseignement de dimanche", w:"Jonathan"},
-  {id:"s4-zoom", d:"11-25", k:"t", c:"gs", x:"Préparer le Zoom GS du 27 (bilan + préparation de décembre)"},
-  {id:"s4-nouv", d:"11-27", k:"t", c:"int", x:"Prendre des nouvelles du département"},
-  {id:"r-2727", d:"11-27", k:"r", c:"gs", h:"20:30", x:"Zoom GS · Bilan du mois + préparation de décembre"},
-  {id:"r-2727b", d:"11-27", k:"r", c:"gs", h:"", x:"10 min d'intercession avec Vanessa · sujets des suivies"},
-  {id:"s4-pu", d:"11-29", k:"t", c:"pu", x:"Faire le planning PU de décembre (20h)"},
-  // Semaine 5
-  {id:"s5-dec", d:"11-30", k:"t", c:"int", x:"Programme du département de décembre (avec Jonathan)"}
-];
-
-// Rendez-vous fixes
-for (let day = 1; day <= 30; day++){
-  const dt = new Date(2026, 10, day), wd = dt.getDay(), d = "11-" + String(day).padStart(2,"0");
-  if (wd === 4){
-    ITEMS.push({id:"f-j"+day, d, k:"r", c:"egl", h:"journée", x:"Jeûne", fixed:1});
-    ITEMS.push({id:"f-p"+day, d, k:"r", c:"egl", h:"19:30", x:"Pré-culte", fixed:1});
-    ITEMS.push({id:"f-c"+day, d, k:"r", c:"egl", h:"20:00", x:"Culte online", fixed:1});
-  }
-  if (wd === 0){
-    ITEMS.push({id:"f-a"+day, d, k:"r", c:"egl", h:"08:00", x:"PU", fixed:1});
-    ITEMS.push({id:"f-b"+day, d, k:"r", c:"egl", h:"08:45", x:"PU", fixed:1});
-    ITEMS.push({id:"f-m"+day, d, k:"r", c:"egl", h:"09:30", x:"MFD online", fixed:1});
-    ITEMS.push({id:"f-f"+day, d, k:"r", c:"egl", h:"aprèm", x:"En famille 🏡", fixed:1});
-  }
-}
-
-const WEEKS = [
-  {n:1, from:2, to:8}, {n:2, from:9, to:15}, {n:3, from:16, to:22}, {n:4, from:23, to:29}, {n:5, from:30, to:30}
-];
-const DAYNAMES = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
-
-// ---- État ----
-let state = {ts:0, done:{}};
-try { state = JSON.parse(document.getElementById("state").textContent); } catch(e){}
-try {
-  const local = JSON.parse(localStorage.getItem("monservice-nov26") || "null");
-  if (local && local.ts > state.ts) state = local;
-} catch(e){}
-if (!Array.isArray(state.custom)) state.custom = [];
-if (!state.edits || typeof state.edits !== "object") state.edits = {};
-if (!state.deleted || typeof state.deleted !== "object") state.deleted = {};
-function allItems(){
-  return ITEMS.filter(it => !state.deleted[it.id]).map(it => state.edits[it.id] ? Object.assign({}, it, state.edits[it.id]) : it).concat(state.custom);
-}
-function findItem(id){ return allItems().find(i => i.id === id); }
-function btns(it){ return it.fixed ? "" : '<span class="acts-i"><button class="ib" data-edit="' + it.id + '" aria-label="Modifier">✏️</button><button class="ib" data-del="' + it.id + '" aria-label="Supprimer">✕</button></span>'; }
-let ui = {view:"week", week:null, filter:"all", fixed:false};
-try { Object.assign(ui, JSON.parse(localStorage.getItem("monservice-ui") || "{}")); } catch(e){}
-
-const today = new Date();
-const isNov = today.getFullYear() === 2026 && today.getMonth() === 10;
-const todayD = isNov ? "11-" + String(today.getDate()).padStart(2,"0") : null;
-if (!ui.week){
-  ui.week = 1;
-  if (isNov) WEEKS.forEach(w => { if (today.getDate() >= w.from && today.getDate() <= w.to) ui.week = w.n; });
-}
-const h = location.hash.slice(1);
-if (h === "mois") ui.view = "month";
-else if (/^semaine-[1-5]$/.test(h)) { ui.view = "week"; ui.week = +h.slice(-1); }
-
-function saveUI(){
-  try { localStorage.setItem("monservice-ui", JSON.stringify(ui)); } catch(e){}
-  try { history.replaceState(null, "", "#" + (ui.view === "month" ? "mois" : "semaine-" + ui.week)); } catch(e){}
-}
-
-// ---- Enregistrement ----
-let artifactApi = null, pending = null;
-if (window.claude && claude.use) claude.use("artifact").then(a => { artifactApi = a; }).catch(()=>{});
-function flash(msg){ const s = document.getElementById("save"); s.textContent = msg; s.classList.add("show"); clearTimeout(flash.t); flash.t = setTimeout(()=>s.classList.remove("show"), 1400); }
-function persist(){
-  state.ts = Date.now();
-  try { localStorage.setItem("monservice-nov26", JSON.stringify(state)); } catch(e){}
-  flash("Enregistré ✓");
-  if (!artifactApi) return;
-  clearTimeout(pending);
-  pending = setTimeout(async () => {
-    const json = JSON.stringify(state).replace(/</g, "\\u003c");
-    const html = SRC.replace(/(<script type="application\/json" id="state">)[\s\S]*?(<\/script>)/, "$1" + json + "$2");
-    try { await artifactApi.publish(html); } catch(e){}
-  }, 2500);
-}
-
-// ---- Rendu ----
 const $ = id => document.getElementById(id);
+const MONTHS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+const MSHORT = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+const DAYNAMES = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+const pad = n => String(n).padStart(2, "0");
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const COLORS = {gs:"var(--c-gs)", int:"var(--c-int)", lead:"var(--c-lead)", pu:"var(--c-pu)", egl:"var(--c-egl)"};
+const DEFNAMES = {gs:"Rôle 1", int:"Rôle 2", lead:"Rôle 3", pu:"Rôle 4", egl:"Fixe"};
+const MONTH_KEY = /^monservice-(nov26|\d{4}-\d{2})$/;
+function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+function lsSet(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+// ---- Dates ----
+function ymd(dt){ return dt.getFullYear() + "-" + pad(dt.getMonth() + 1) + "-" + pad(dt.getDate()); }
+function parseYmd(s){ return new Date(+s.slice(0,4), +s.slice(5,7) - 1, +s.slice(8,10)); }
+function addDays(dt, n){ return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + n); }
+function mondayOf(dt){ return addDays(dt, -((dt.getDay() + 6) % 7)); }
+function ymOf(dt){ return dt.getFullYear() + "-" + pad(dt.getMonth() + 1); }
+function md(dt){ return pad(dt.getMonth() + 1) + "-" + pad(dt.getDate()); }
+function itemDate(ym, d){ return new Date(+ym.slice(0,4), +d.slice(0,2) - 1, +d.slice(3,5)); }
+function daysBetween(a, b){ return Math.round((b - a) / 864e5); }
+function monthDays(ym){ return new Date(+ym.slice(0,4), +ym.slice(5), 0).getDate(); }
+function validYmd(s){ if (!/^\d{4}-\d{2}-\d{2}$/.test(s || "")) return false; const d = parseYmd(s); return ymd(d) === s; }
+let today;
+function refreshToday(){ const n = new Date(); today = new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+refreshToday();
+
+// ---- Fichier de contenu (reste sur l'appareil, jamais sur GitHub) ----
+let contenu = null, CATS = {}, FIXES = [];
+function loadContenu(){
+  try { const v = lsGet("monservice:contenu"); contenu = v ? JSON.parse(v) : null; } catch(e){ contenu = null; }
+  if (!contenu || typeof contenu !== "object") contenu = null;
+  const c = contenu || {};
+  CATS = {};
+  Object.keys(COLORS).forEach(k => {
+    const o = (c.cats && c.cats[k]) || {};
+    const name = o.name || DEFNAMES[k];
+    CATS[k] = {name:name, short:o.short || name, color:COLORS[k]};
+  });
+  FIXES = Array.isArray(c.fixes) ? c.fixes.filter(f => f && typeof f.j === "number" && f.x) : [];
+}
+loadContenu();
+
+// ---- Tâches qui se répètent chaque semaine ----
+let RECUR = [];
+function loadRecur(){
+  try { const v = JSON.parse(lsGet("monservice:recur") || "[]"); RECUR = Array.isArray(v) ? v.filter(r => r && r.id && validYmd(r.from) && r.x && typeof r.j === "number") : []; }
+  catch(e){ RECUR = []; }
+}
+function saveRecur(){ lsSet("monservice:recur", JSON.stringify(RECUR)); }
+loadRecur();
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+
+// Le report automatique commence à la semaine où cette version est installée
+let carryFrom = lsGet("monservice:carryFrom");
+if (!validYmd(carryFrom)){ carryFrom = ymd(mondayOf(today)); lsSet("monservice:carryFrom", carryFrom); }
+
+// ---- État de chaque mois (coches, ajouts) ----
+function lsKey(ym){ return ym === "2026-11" ? "monservice-nov26" : "monservice-" + ym; }
+function freshState(){ return {ts:0, done:{}, custom:[], edits:{}, deleted:{}}; }
+function readState(ym){
+  let st = freshState();
+  const emb = contenu && contenu.etat && contenu.etat[ym];
+  if (emb && typeof emb === "object") { try { st = Object.assign(st, JSON.parse(JSON.stringify(emb))); } catch(e){} }
+  try {
+    const local = JSON.parse(lsGet(lsKey(ym)) || "null");
+    if (local && (local.ts || 0) > (st.ts || 0)) st = local;
+  } catch(e){}
+  if (!st.done || typeof st.done !== "object") st.done = {};
+  if (!Array.isArray(st.custom)) st.custom = [];
+  if (!st.edits || typeof st.edits !== "object") st.edits = {};
+  if (!st.deleted || typeof st.deleted !== "object") st.deleted = {};
+  return st;
+}
+let states = {};
+function S(ym){ return states[ym] || (states[ym] = readState(ym)); }
+function save(ym){ const st = S(ym); st.ts = Date.now(); lsSet(lsKey(ym), JSON.stringify(st)); }
+
+// ---- Éléments d'un mois ----
+function fixedItems(ym){
+  const out = [], y = +ym.slice(0,4), m = +ym.slice(5) - 1;
+  for (let day = 1; day <= monthDays(ym); day++){
+    const wd = new Date(y, m, day).getDay();
+    FIXES.forEach((f, i) => {
+      if (f.j === wd) out.push({id:"f-" + ym + "-" + day + "-" + i, d:pad(m + 1) + "-" + pad(day), k:"r", c:"egl", h:f.h || "", x:f.x, fixed:1});
+    });
+  }
+  return out;
+}
+function recurItems(ym){
+  const out = [], y = +ym.slice(0,4), m = +ym.slice(5) - 1;
+  if (!RECUR.length) return out;
+  for (let day = 1; day <= monthDays(ym); day++){
+    const dt = new Date(y, m, day), s = ymd(dt), wd = dt.getDay();
+    RECUR.forEach(r => {
+      if (r.j === wd && s >= r.from && (!r.to || s <= r.to)){
+        const it = {id:"r-" + r.id + "-" + s.replace(/-/g, ""), d:md(dt), k:r.k, c:r.c, x:r.x, rid:r.id};
+        if (r.h) it.h = r.h;
+        if (r.w) it.w = r.w;
+        out.push(it);
+      }
+    });
+  }
+  return out;
+}
+function baseItems(ym){
+  const m = (contenu && contenu.mois && Array.isArray(contenu.mois[ym])) ? contenu.mois[ym] : [];
+  return m.concat(recurItems(ym), fixedItems(ym));
+}
+function allItems(ym){
+  const st = S(ym);
+  return baseItems(ym).filter(it => !st.deleted[it.id])
+    .map(it => Object.assign({}, it, st.edits[it.id] || {}, {_ym:ym}))
+    .concat(st.custom.map(it => Object.assign({}, it, {_ym:ym})));
+}
+function findItem(ym, id){ return allItems(ym).find(i => i.id === id); }
+function clean(it){ const c = Object.assign({}, it); delete c._ym; return c; }
+function removeFrom(ym, id){
+  const st = S(ym);
+  if (st.custom.some(i => i.id === id)) st.custom = st.custom.filter(i => i.id !== id);
+  else st.deleted[id] = true;
+  delete st.edits[id]; delete st.done[id];
+}
+function knownMonths(){
+  const set = new Set(Object.keys(states));
+  try { for (let i = 0; i < localStorage.length; i++){ const m = MONTH_KEY.exec(localStorage.key(i)); if (m) set.add(m[1] === "nov26" ? "2026-11" : m[1]); } } catch(e){}
+  if (contenu && contenu.mois) Object.keys(contenu.mois).forEach(k => set.add(k));
+  if (contenu && contenu.etat) Object.keys(contenu.etat).forEach(k => set.add(k));
+  return [...set].filter(k => /^\d{4}-\d{2}$/.test(k)).sort();
+}
+
+// ---- Report automatique : une tâche pas faite passe au même jour de la semaine suivante ----
+function carryOver(){
+  const tdy = ymd(today), tym = ymOf(today), touched = new Set();
+  let moved = 0;
+  knownMonths().filter(ym => ym <= tym && ym >= carryFrom.slice(0,7)).forEach(ym => {
+    const st = S(ym);
+    allItems(ym).forEach(it => {
+      if (it.k !== "t" || it.fixed || it.rid || st.done[it.id]) return;
+      const dt = itemDate(ym, it.d), s = ymd(dt);
+      if (s >= tdy || s < carryFrom) return;
+      const nd = addDays(dt, 7 * Math.ceil(daysBetween(dt, today) / 7)), nym = ymOf(nd);
+      const c = clean(it); c.d = md(nd); if (!c.orig) c.orig = s;
+      removeFrom(ym, it.id);
+      S(nym).custom.push(c);
+      touched.add(ym); touched.add(nym); moved++;
+    });
+  });
+  touched.forEach(save);
+  return moved;
+}
+
+// ---- Affichage ----
+let ui = {view:"week", filter:"all", fixed:false, wk:null, ym:null};
+try { ui.fixed = !!JSON.parse(lsGet("monservice-ui") || "{}").fixed; } catch(e){}
+try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch(e){}
+function saveUI(){ lsSet("monservice-ui", JSON.stringify({fixed:ui.fixed})); }
+function curMonday(){ return ymd(mondayOf(today)); }
+function goToday(){ refreshToday(); ui.wk = curMonday(); ui.ym = ymOf(today); }
+function setWeek(dt){ const mo = mondayOf(dt); ui.wk = ymd(mo); ui.ym = ymOf(addDays(mo, 3)); }
+function viewYm(){ return ui.view === "week" ? ymOf(addDays(parseYmd(ui.wk), 3)) : ui.ym; }
+function monthAnchor(ym){ return ym === ymOf(today) ? today : new Date(+ym.slice(0,4), +ym.slice(5) - 1, 4); }
+function shiftMonth(dir){
+  const base = viewYm(), ym = ymOf(new Date(+base.slice(0,4), +base.slice(5) - 1 + dir, 1));
+  if (ui.view === "week") setWeek(monthAnchor(ym));
+  ui.ym = ym;
+}
+function weeksOf(ym){
+  const ex = contenu && contenu.semaines && contenu.semaines[ym];
+  if (Array.isArray(ex) && ex.length && ex.every(w => Array.isArray(w) && w.length === 2))
+    return ex.map((w, i) => ({n:i + 1, from:w[0], to:w[1]}));
+  const out = [], n = monthDays(ym), y = +ym.slice(0,4), m = +ym.slice(5) - 1;
+  let start = 1;
+  for (let d = 1; d <= n; d++){
+    if (new Date(y, m, d).getDay() === 0 || d === n){ out.push({n:out.length + 1, from:start, to:d}); start = d + 1; }
+  }
+  return out;
+}
+
+function flash(msg, ms){ const s = $("save"); s.textContent = msg; s.classList.add("show"); clearTimeout(flash.t); flash.t = setTimeout(() => s.classList.remove("show"), ms || 1400); }
 function visible(it){
   if (it.fixed && !ui.fixed) return false;
   if (ui.filter !== "all" && it.c !== ui.filter && !(it.fixed && ui.fixed)) return false;
   return true;
 }
-function esc(s){ return s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function shortDate(s){ const d = parseYmd(s); return DAYNAMES[d.getDay()].slice(0,3) + ". " + d.getDate() + " " + MSHORT[d.getMonth()]; }
 function pills(it){
   let p = "";
   if (it.w === "c") p += '<span class="pill confirm">à confirmer</span>';
   else if (it.w) p += '<span class="pill deleg">' + esc(it.w) + '</span>';
+  if (it.orig) p += '<span class="pill carry">↪ reportée du ' + esc(shortDate(it.orig)) + '</span>';
+  if (it.rid) p += '<span class="pill rec">⟳ chaque semaine</span>';
   if (it.u) p += '<span class="pill mine">ajouté</span>';
-  p += '<span class="pill" style="color:' + CATS[it.c].color + '">' + CATS[it.c].short + '</span>';
+  const ct = CATS[it.c] || CATS.gs;
+  p += '<span class="pill" style="color:' + ct.color + '">' + esc(ct.short) + '</span>';
   return '<div class="meta">' + p + '</div>';
 }
+function btns(it){
+  if (it.fixed) return "";
+  const a = ' data-ym="' + it._ym + '"';
+  return '<span class="acts-i"><button class="ib" data-edit="' + esc(it.id) + '"' + a + ' aria-label="Modifier">✏️</button><button class="ib" data-del="' + esc(it.id) + '"' + a + ' aria-label="Supprimer">✕</button></span>';
+}
+function dayShort(ym, d){ const dt = itemDate(ym, d); return DAYNAMES[dt.getDay()].slice(0,3) + " " + dt.getDate(); }
 function taskHTML(it, withDate){
-  const done = !!state.done[it.id];
-  const dlabel = withDate ? '<span class="d">' + dayShort(it.d) + '</span>' : "";
-  return '<div class="task' + (done ? " done" : "") + '" data-id="' + it.id + '" style="--cc:' + CATS[it.c].color + '">' +
+  const done = !!S(it._ym).done[it.id];
+  const ct = CATS[it.c] || CATS.gs;
+  const dlabel = withDate ? '<span class="d">' + dayShort(it._ym, it.d) + '</span>' : "";
+  return '<div class="task' + (done ? " done" : "") + '" data-id="' + esc(it.id) + '" data-ym="' + it._ym + '" style="--cc:' + ct.color + '">' +
     dlabel + '<span class="box"></span><div class="txt">' + (it.h ? '<b>' + esc(it.h) + '</b> · ' : '') + esc(it.x) + pills(it) + '</div>' + btns(it) + '</div>';
 }
-function dayShort(d){ const n = +d.slice(3); return DAYNAMES[new Date(2026,10,n).getDay()].slice(0,3) + " " + n; }
+// Rendez-vous rangés par heure (« journée » en premier, sans heure = juste avant le suivant)
+function tkey(h){
+  h = (h || "").toLowerCase().trim();
+  const m = /^(\d{1,2})\s*[:h]\s*(\d{2})?$/.exec(h);
+  if (m) return (+m[1]) * 60 + (+(m[2] || 0));
+  if (/journ/.test(h)) return -1;
+  if (/matin/.test(h)) return 540;
+  if (/midi/.test(h)) return 720;
+  if (/apr[eè]s?-?m/.test(h)) return 840;
+  if (/soir/.test(h)) return 1140;
+  return null;
+}
+function sortByTime(list){
+  const keys = list.map(r => tkey(r.h));
+  let next = 1441;
+  for (let i = keys.length - 1; i >= 0; i--){ if (keys[i] == null) keys[i] = next - 0.5; else next = keys[i]; }
+  return list.map((r, i) => [r, keys[i], i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
+}
 
+function renderHead(){
+  const eg = contenu && contenu.eglise;
+  $("eglise").textContent = eg || ""; $("eglise").hidden = !eg;
+  const vy = viewYm();
+  $("mlabel").textContent = MONTHS[+vy.slice(5) - 1] + " " + vy.slice(0,4);
+  const away = ui.view === "week" ? ui.wk !== curMonday() : ui.ym !== ymOf(today);
+  $("mnow").classList.toggle("show", away);
+  $("verse").textContent = (contenu && contenu.verset) || "« Marie a choisi la bonne part » · Luc 10:42";
+  const ex = (contenu && contenu.exemples) || {};
+  $("fx").placeholder = ex.quoi || "Ex. Appeler quelqu'un";
+  $("fw").placeholder = ex.qui || "Ex. un prénom";
+  $("fixBox").hidden = !FIXES.length;
+  const jours = []; FIXES.forEach(f => { const n = DAYNAMES[f.j]; if (n && jours.indexOf(n) < 0) jours.push(n); });
+  $("fixLab").textContent = "Afficher mes rendez-vous fixes" + (jours.length ? " (" + jours.join(", ") + ")" : "");
+}
 function renderChips(){
   const opts = [["all","Tout",null]].concat(["gs","int","lead","pu"].map(k => [k, CATS[k].name, CATS[k].color]));
   $("chips").innerHTML = opts.map(([k,n,c]) =>
-    '<button class="chip' + (ui.filter === k ? " on" : "") + '" data-f="' + k + '">' + (c ? '<span class="dot" style="background:' + c + '"></span>' : "") + n + '</button>').join("");
-  $("legend").innerHTML = ["gs","int","lead","pu","egl"].map(k => '<span><i class="dot" style="background:' + CATS[k].color + '"></i>' + CATS[k].name + '</span>').join("");
+    '<button class="chip' + (ui.filter === k ? " on" : "") + '" data-f="' + k + '">' + (c ? '<span class="dot" style="background:' + c + '"></span>' : "") + esc(n) + '</button>').join("");
+  $("legend").innerHTML = ["gs","int","lead","pu"].concat(FIXES.length ? ["egl"] : []).map(k => '<span><i class="dot" style="background:' + CATS[k].color + '"></i>' + esc(CATS[k].name) + '</span>').join("");
+  $("cSeg").innerHTML = ["gs","int","lead","pu"].map(k => '<button data-c="' + k + '">' + esc(CATS[k].short) + '</button>').join("");
+  syncSeg();
 }
 
 function renderWeek(){
-  const w = WEEKS[ui.week - 1];
-  const tasks = allItems().filter(it => it.k === "t" && +it.d.slice(3) >= w.from && +it.d.slice(3) <= w.to && visible(it));
-  const done = tasks.filter(t => state.done[t.id]).length;
-  const label = w.from === w.to ? "Lundi 30 novembre" : "Du " + w.from + " au " + w.to + " novembre";
-  let out = '<div class="weeknav"><button id="prev"' + (ui.week === 1 ? " disabled" : "") + '>‹</button>' +
-    '<div class="wk"><b>Semaine ' + w.n + '</b><small>' + label + ' · ' + done + '/' + tasks.length + ' tâches faites</small>' +
+  const mon = parseYmd(ui.wk), days = [0,1,2,3,4,5,6].map(i => addDays(mon, i)), sun = days[6];
+  const cache = {}, items = ym => cache[ym] || (cache[ym] = allItems(ym));
+  const per = days.map(dt => { const d = md(dt); return items(ymOf(dt)).filter(it => it.d === d && visible(it)); });
+  const tasks = [].concat(...per.map(l => l.filter(it => it.k === "t")));
+  const done = tasks.filter(t => S(t._ym).done[t.id]).length;
+  const rel = Math.round(daysBetween(mondayOf(today), mon) / 7);
+  const title = rel === 0 ? "Cette semaine" : rel === 1 ? "Semaine prochaine" : rel === -1 ? "Semaine dernière" : "Semaine du " + mon.getDate() + " " + MSHORT[mon.getMonth()];
+  const spans = mon.getMonth() !== sun.getMonth();
+  let range = spans ? "Du " + mon.getDate() + " " + MONTHS[mon.getMonth()] + " au " + sun.getDate() + " " + MONTHS[sun.getMonth()]
+                    : "Du " + mon.getDate() + " au " + sun.getDate() + " " + MONTHS[sun.getMonth()];
+  if (sun.getFullYear() !== today.getFullYear()) range += " " + sun.getFullYear();
+  let out = '<div class="weeknav"><button id="prev" aria-label="Semaine précédente">‹</button>' +
+    '<div class="wk"><b>' + title + '</b><small>' + range + ' · ' + done + '/' + tasks.length + ' tâches faites</small>' +
     '<div class="bar"><i style="width:' + (tasks.length ? Math.round(done/tasks.length*100) : 0) + '%"></i></div></div>' +
-    '<button id="next"' + (ui.week === 5 ? " disabled" : "") + '>›</button></div>';
-  for (let n = w.from; n <= w.to; n++){
-    const d = "11-" + String(n).padStart(2,"0");
-    const dt = new Date(2026,10,n), wd = dt.getDay();
-    const rdv = allItems().filter(it => it.d === d && it.k === "r" && visible(it));
-    const tk = allItems().filter(it => it.d === d && it.k === "t" && visible(it));
-    out += '<div class="day' + (d === todayD ? " today" : "") + '"><div class="dh"><b>' + DAYNAMES[wd] + ' ' + n + '</b>' +
-      (d === todayD ? '<span class="tag">AUJOURD\'HUI</span>' : "") + '</div>';
-    const hasFixed = ITEMS.some(it => it.d === d && it.fixed);
-    if (!rdv.length && !tk.length) out += '<div class="empty">' + (hasFixed && !ui.fixed ? (wd === 4 ? "Jeûne, pré-culte et culte seulement 🖤" : "PU, MFD, puis l'après-midi en famille 🏡") : "Rien de prévu · temps de repos 🌿") + '</div>';
+    '<button id="next" aria-label="Semaine suivante">›</button></div>';
+  const tdy = ymd(today), vide = (contenu && contenu.videFixe) || {};
+  days.forEach((dt, i) => {
+    const wd = dt.getDay(), isT = ymd(dt) === tdy;
+    const rdv = sortByTime(per[i].filter(it => it.k === "r")), tk = per[i].filter(it => it.k === "t");
+    out += '<div class="day' + (isT ? " today" : "") + '"><div class="dh"><b>' + DAYNAMES[wd] + ' ' + dt.getDate() + (spans ? ' ' + MSHORT[dt.getMonth()] : '') + '</b>' +
+      '<span class="right">' + (isT ? '<span class="tag">AUJOURD\'HUI</span>' : "") + '<button class="addday" data-day="' + ymd(dt) + '" aria-label="Ajouter ce jour-là">+</button></span></div>';
+    const hasFixed = FIXES.some(f => f.j === wd);
+    if (!rdv.length && !tk.length) out += '<div class="empty">' + (hasFixed && !ui.fixed ? esc(vide[wd] || "Rendez-vous fixes seulement") : "Rien de prévu · temps de repos 🌿") + '</div>';
     if (rdv.length){
       out += '<div class="sec">Rendez-vous</div>';
-      rdv.forEach(r => { out += '<div class="rdv' + (r.fixed ? " fixed" : "") + '"><span class="time">' + (r.h || "") + '</span><span class="dot" style="background:' + CATS[r.c].color + '"></span><span style="flex:1">' + esc(r.x) + (r.u ? ' <span class="pill mine">ajouté</span>' : '') + '</span>' + btns(r) + '</div>'; });
+      rdv.forEach(r => {
+        const ct = CATS[r.c] || CATS.gs;
+        out += '<div class="rdv' + (r.fixed ? " fixed" : "") + '"><span class="time">' + esc(r.h || "") + '</span><span class="dot" style="background:' + ct.color + '"></span><span style="flex:1">' + esc(r.x) +
+          (r.w && r.w !== "c" ? ' <span class="pill deleg">' + esc(r.w) + '</span>' : '') + (r.w === "c" ? ' <span class="pill confirm">à confirmer</span>' : '') +
+          (r.rid ? ' <span class="pill rec">⟳</span>' : '') + (r.u ? ' <span class="pill mine">ajouté</span>' : '') + '</span>' + btns(r) + '</div>';
+      });
     }
     if (tk.length){
       out += '<div class="sec">À faire</div>';
       tk.forEach(t => out += taskHTML(t, false));
     }
     out += '</div>';
-  }
+  });
   return out;
 }
 
 function renderMonth(){
-  const all = allItems().filter(it => it.k === "t" && visible(it));
+  const ym = ui.ym, st = S(ym), y = +ym.slice(0,4), m = +ym.slice(5) - 1;
+  const all = allItems(ym).filter(it => it.k === "t" && visible(it)).sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : 0);
   const mine = all.filter(t => !(t.w && t.w !== "c"));
-  const done = mine.filter(t => state.done[t.id]).length;
-  const conf = mine.filter(t => t.w === "c" && !state.done[t.id]).length;
+  const done = mine.filter(t => st.done[t.id]).length;
+  const conf = mine.filter(t => t.w === "c" && !st.done[t.id]).length;
   let out = '<div class="stats"><div class="stat"><b>' + done + '/' + mine.length + '</b><span>tâches faites</span></div>' +
     '<div class="stat"><b>' + (mine.length - done) + '</b><span>restantes</span></div>' +
     '<div class="stat"><b style="color:var(--rose)">' + conf + '</b><span>à confirmer</span></div></div>';
   out += '<div class="month">';
-  WEEKS.forEach(w => {
+  weeksOf(ym).forEach(w => {
     const tk = all.filter(t => +t.d.slice(3) >= w.from && +t.d.slice(3) <= w.to);
     if (!tk.length) return;
-    const dn = tk.filter(t => state.done[t.id]).length;
-    out += '<div class="week"><h3>Semaine ' + w.n + '<small>' + dn + '/' + tk.length + '</small></h3>';
+    const dn = tk.filter(t => st.done[t.id]).length;
+    out += '<div class="week"><h3 class="go" data-goto="' + ymd(new Date(y, m, w.from)) + '">Semaine ' + w.n + '<small>' + dn + '/' + tk.length + '</small></h3>';
     tk.forEach(t => out += taskHTML(t, true));
     out += '</div>';
   });
+  if (!all.length) out += '<div class="week"><div class="empty">Rien de prévu ce mois-ci. Appuie sur + pour ajouter une tâche ou un rendez-vous.</div></div>';
   return out + '</div>';
 }
 
@@ -362,56 +509,107 @@ function render(){
   $("tWeek").classList.toggle("on", ui.view === "week");
   $("tMonth").classList.toggle("on", ui.view === "month");
   $("showFixed").checked = ui.fixed;
+  renderHead();
   renderChips();
   $("app").innerHTML = ui.view === "week" ? renderWeek() : renderMonth();
   saveUI();
 }
+function scrollToToday(){
+  const el = document.querySelector(".day.today");
+  if (ui.view === "week" && el && el.getBoundingClientRect().top > window.innerHeight * 0.6) el.scrollIntoView({block:"start"});
+}
+function step(dir){
+  if (ui.view === "week") setWeek(addDays(parseYmd(ui.wk), 7 * dir)); else shiftMonth(dir);
+  render(); window.scrollTo({top:0});
+}
+function backToToday(){ goToday(); render(); window.scrollTo({top:0}); scrollToToday(); }
 
 document.addEventListener("click", e => {
   const del = e.target.closest("[data-del]");
-  if (del){ e.stopPropagation(); askDelete(del.dataset.del, del); return; }
+  if (del){ e.stopPropagation(); askDelete(del.dataset.del, del.dataset.ym, del); return; }
   const ed = e.target.closest("[data-edit]");
-  if (ed){ e.stopPropagation(); openForm(ed.dataset.edit); return; }
+  if (ed){ e.stopPropagation(); openForm(ed.dataset.edit, ed.dataset.ym); return; }
+  const ad = e.target.closest("[data-day]");
+  if (ad){ e.stopPropagation(); openForm(null, null, ad.dataset.day); return; }
+  const go = e.target.closest("[data-goto]");
+  if (go){ ui.view = "week"; setWeek(parseYmd(go.dataset.goto)); render(); window.scrollTo({top:0}); return; }
   const t = e.target.closest(".task");
-  if (t){ const id = t.dataset.id; if (state.done[id]) delete state.done[id]; else state.done[id] = true; render(); persist(); return; }
+  if (t){
+    const id = t.dataset.id, ym = t.dataset.ym, st = S(ym);
+    if (st.done[id]) delete st.done[id]; else st.done[id] = true;
+    save(ym); render(); flash("Enregistré ✓"); return;
+  }
   const f = e.target.closest(".chip");
   if (f){ ui.filter = f.dataset.f; render(); return; }
-  if (e.target.id === "prev" && ui.week > 1){ ui.week--; render(); window.scrollTo({top:0}); }
-  if (e.target.id === "next" && ui.week < 5){ ui.week++; render(); window.scrollTo({top:0}); }
+  const id = e.target.id;
+  if (id === "prev") step(-1);
+  else if (id === "next") step(1);
+  else if (id === "mprev"){ shiftMonth(-1); render(); window.scrollTo({top:0}); }
+  else if (id === "mnext"){ shiftMonth(1); render(); window.scrollTo({top:0}); }
+  else if (id === "mnow") backToToday();
 });
-$("tWeek").onclick = () => { ui.view = "week"; render(); };
-$("tMonth").onclick = () => { ui.view = "month"; render(); };
+$("tWeek").onclick = () => { if (ui.view !== "week"){ ui.view = "week"; setWeek(monthAnchor(ui.ym)); } render(); };
+$("tMonth").onclick = () => { if (ui.view !== "month"){ ui.ym = ui.wk === curMonday() ? ymOf(today) : viewYm(); ui.view = "month"; } render(); };
 $("showFixed").onchange = e => { ui.fixed = e.target.checked; render(); };
-window.addEventListener("hashchange", () => {
-  const h = location.hash.slice(1);
-  if (h === "mois") ui.view = "month"; else if (/^semaine-[1-5]$/.test(h)) { ui.view = "week"; ui.week = +h.slice(-1); }
-  render();
-});
-// ---- Ajout manuel ----
-let fk = "t", fc = "gs", pendingDel = null, editId = null;
-function openForm(id){
-  editId = (typeof id === "string") ? id : null;
+
+// Glisser à gauche / à droite pour changer de semaine (ou de mois)
+let tx = null, ty = null;
+$("app").addEventListener("touchstart", e => { if (e.touches.length !== 1) { tx = null; return; } tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive:true});
+$("app").addEventListener("touchend", e => {
+  if (tx == null) return;
+  const t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty; tx = null;
+  if (Math.abs(dx) > 70 && Math.abs(dy) < 45) step(dx < 0 ? 1 : -1);
+}, {passive:true});
+
+// Quand je rouvre l'appli (même sans la fermer), elle revient sur aujourd'hui
+let hiddenAt = 0;
+function resume(){
+  const was = ymd(today); refreshToday();
+  if ($("modal").classList.contains("open")) return;
+  if (ymd(today) !== was || Date.now() - hiddenAt > 30 * 60 * 1000){
+    const n = carryOver();
+    ui.view = "week"; ui.filter = "all"; goToday(); render(); window.scrollTo({top:0}); scrollToToday();
+    if (n) flash(n + (n > 1 ? " tâches reportées" : " tâche reportée") + " à la semaine suivante", 2600);
+  }
+}
+document.addEventListener("visibilitychange", () => { if (document.hidden) hiddenAt = Date.now(); else resume(); });
+window.addEventListener("pageshow", e => { if (e.persisted){ hiddenAt = 0; resume(); } });
+
+// ---- Ajouter / modifier ----
+let fk = "t", fc = "gs", pendingDel = null, editId = null, editYm = null;
+function openForm(id, ym, dateStr){
+  editId = (typeof id === "string") ? id : null; editYm = editId ? ym : null;
   $("ferr").textContent = "";
   if (editId){
-    const it = findItem(editId); if (!it) return;
+    const it = findItem(editYm, editId); if (!it){ editId = null; return; }
     fk = it.k; fc = it.c;
-    $("fx").value = it.x; $("fh").value = it.h || ""; $("fd").value = "2026-" + it.d;
+    $("fx").value = it.x; $("fh").value = it.h || ""; $("fd").value = ymd(itemDate(editYm, it.d));
     $("fconf").checked = it.w === "c"; $("fw").value = (it.w && it.w !== "c") ? it.w : "";
+    $("frep").checked = !!it.rid; $("frepHint").hidden = !it.rid;
     $("ftitle").textContent = "Modifier"; $("fok").textContent = "Enregistrer";
   } else {
     fk = "t"; fc = ui.filter !== "all" ? ui.filter : "gs";
     $("fx").value = ""; $("fh").value = ""; $("fw").value = ""; $("fconf").checked = false;
-    const w = WEEKS[ui.week - 1];
-    let def = w.from;
-    if (isNov && today.getDate() >= w.from && today.getDate() <= w.to) def = today.getDate();
-    $("fd").value = "2026-11-" + String(def).padStart(2,"0");
+    $("frep").checked = false; $("frepHint").hidden = true;
+    let def = dateStr;
+    if (!def){
+      if (ui.view === "week"){ const mon = parseYmd(ui.wk); def = (today >= mon && today <= addDays(mon, 6)) ? ymd(today) : ui.wk; }
+      else def = ymd(monthAnchor(ui.ym).getTime() === today.getTime() ? today : new Date(+ui.ym.slice(0,4), +ui.ym.slice(5) - 1, 1));
+    }
+    $("fd").value = def;
     $("ftitle").textContent = "Ajouter"; $("fok").textContent = "Ajouter";
   }
-  syncSeg(); $("modal").classList.add("open"); setTimeout(()=>$("fx").focus(), 50);
+  syncSeg(); $("modal").classList.add("open"); setTimeout(() => $("fx").focus(), 50);
 }
 function syncSeg(){
   document.querySelectorAll("#kSeg button").forEach(b => b.classList.toggle("on", b.dataset.k === fk));
   document.querySelectorAll("#cSeg button").forEach(b => b.classList.toggle("on", b.dataset.c === fc));
+}
+function normTime(v){
+  v = v.trim();
+  const m = /^(\d{1,2})\s*[:hH.]\s*(\d{2})?$/.exec(v);
+  if (m && +m[1] < 24 && (!m[2] || +m[2] < 60)) return pad(+m[1]) + ":" + (m[2] || "00");
+  return v;
 }
 $("fab").onclick = () => openForm();
 $("fcancel").onclick = () => $("modal").classList.remove("open");
@@ -421,32 +619,148 @@ $("cSeg").onclick = e => { const b = e.target.closest("button"); if (b){ fc = b.
 $("fok").onclick = () => {
   const x = $("fx").value.trim(), dv = $("fd").value;
   if (!x){ $("ferr").textContent = "Écris ce que tu veux ajouter."; return; }
-  if (!/^2026-11-\d\d$/.test(dv)){ $("ferr").textContent = "Choisis une date en novembre."; return; }
-  const d = dv.slice(5), hv = $("fh").value.trim(), wv = $("fw").value.trim();
-  const w = $("fconf").checked ? "c" : (wv || "");
+  if (!validYmd(dv)){ $("ferr").textContent = "Choisis une date."; return; }
+  const nd = parseYmd(dv), nym = ymOf(nd), d = md(nd), hv = normTime($("fh").value), wv = $("fw").value.trim();
+  const w = $("fconf").checked ? "c" : (wv || ""), rep = $("frep").checked;
+  const fields = {k:fk, c:fc, x:x}; if (hv) fields.h = hv; if (w) fields.w = w;
+  const rule = () => Object.assign({id:newId(), j:nd.getDay(), from:dv, to:null}, fields);
+  const touched = new Set([nym]);
   if (editId){
-    const patch = {d, k:fk, c:fc, x, h:hv, w};
-    const cu = state.custom.find(i => i.id === editId);
-    if (cu) Object.assign(cu, patch); else state.edits[editId] = patch;
+    touched.add(editYm);
+    const src = findItem(editYm, editId);
+    if (src && src.rid){
+      const r = RECUR.find(q => q.id === src.rid);
+      const occ = editId.slice(-8), occS = occ.slice(0,4) + "-" + occ.slice(4,6) + "-" + occ.slice(6,8);
+      const wasDone = !!S(editYm).done[editId];
+      removeFrom(editYm, editId); delete S(editYm).deleted[editId];
+      if (r){
+        const oldTo = r.to;
+        if (r.from >= occS) RECUR = RECUR.filter(q => q !== r); else r.to = ymd(addDays(parseYmd(occS), -1));
+        if (rep){ const nr = rule(); nr.to = oldTo; RECUR.push(nr); if (wasDone) S(nym).done["r-" + nr.id + "-" + dv.replace(/-/g, "")] = true; }
+      }
+      if (!rep || !r){ const it = Object.assign({id:"u-" + Date.now(), d:d}, fields); S(nym).custom.push(it); if (wasDone) S(nym).done[it.id] = true; }
+      saveRecur();
+    } else if (rep){
+      removeFrom(editYm, editId); RECUR.push(rule()); saveRecur();
+    } else if (nym === editYm){
+      const st = S(editYm), cu = st.custom.find(i => i.id === editId);
+      if (cu){ Object.assign(cu, {d:d}, fields); if (!hv) delete cu.h; if (!w) delete cu.w; }
+      else st.edits[editId] = Object.assign({d:d, h:"", w:""}, fields);
+    } else {
+      const wasDone = !!S(editYm).done[editId];
+      const c = Object.assign(clean(src), {d:d}, fields); if (!hv) delete c.h; if (!w) delete c.w;
+      removeFrom(editYm, editId); S(nym).custom.push(c); if (wasDone) S(nym).done[c.id] = true;
+    }
+  } else if (rep){
+    RECUR.push(rule()); saveRecur();
   } else {
-    const it = {id:"u-" + Date.now(), d, k:fk, c:fc, x, u:1};
-    if (hv) it.h = hv;
-    if (w) it.w = w;
-    state.custom.push(it);
+    S(nym).custom.push(Object.assign({id:"u-" + Date.now(), d:d, u:1}, fields));
   }
-  const n = +d.slice(3); WEEKS.forEach(w => { if (n >= w.from && n <= w.to) ui.week = w.n; });
-  $("modal").classList.remove("open"); render(); persist();
+  touched.forEach(save);
+  if (ui.view === "week") setWeek(nd); else ui.ym = nym;
+  $("modal").classList.remove("open"); render(); flash(rep ? "Enregistré ✓ · chaque " + DAYNAMES[nd.getDay()] : "Enregistré ✓");
 };
-function askDelete(id, btn){
+function askDelete(id, ym, btn){
   if (pendingDel === id){
-    if (state.custom.some(i => i.id === id)) state.custom = state.custom.filter(i => i.id !== id);
-    else state.deleted[id] = true;
-    delete state.done[id]; delete state.edits[id]; pendingDel = null; render(); persist(); return;
+    removeFrom(ym, id); pendingDel = null; save(ym); render(); flash("Supprimé"); return;
   }
-  pendingDel = id; if (btn) btn.classList.add("arm"); flash("Appuie encore sur ✕ pour supprimer");
+  pendingDel = id; if (btn) btn.classList.add("arm");
+  flash(id.indexOf("r-") === 0 ? "Appuie encore sur ✕ pour supprimer ce jour-là" : "Appuie encore sur ✕ pour supprimer", 2400);
   setTimeout(() => { if (pendingDel === id){ pendingDel = null; render(); } }, 3000);
 }
+
+// ---- Ma sauvegarde ----
+function bkMsg(t){ $("bk-msg").innerHTML = t; }
+function bkWhen(){
+  const t = +(lsGet("monservice:lastbk") || 0), el = $("bk-when");
+  if (!t){ el.textContent = "· pas encore faite"; el.className = "warn"; return; }
+  const n = Math.floor((Date.now() - t) / 864e5);
+  el.textContent = n === 0 ? "· faite aujourd'hui" : n === 1 ? "· faite hier" : "· il y a " + n + " jours";
+  el.className = n >= 7 ? "warn" : "";
+}
+function bkData(){
+  const data = {};
+  try {
+    for (let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i), m = MONTH_KEY.exec(k);
+      if (m) data[m[1] === "nov26" ? "2026-11" : m[1]] = JSON.parse(localStorage.getItem(k));
+    }
+  } catch(e){}
+  const o = {app:"mon-service", v:2, date:new Date().toISOString(), data:data, recur:RECUR, carryFrom:carryFrom};
+  if (contenu) o.contenu = contenu;
+  return JSON.stringify(o);
+}
+function bkDone(){ lsSet("monservice:lastbk", String(Date.now())); bkWhen(); }
+let bkPending = null;
+function bkRestore(txt){
+  let o = null; try { o = JSON.parse(txt); } catch(e){ o = null; }
+  if (!o || o.app !== "mon-service" || !o.data || typeof o.data !== "object"){
+    bkMsg("Ce texte n'est pas une sauvegarde de Mon service. Vérifie que tu as tout copié."); return;
+  }
+  bkPending = o;
+  const nr = Array.isArray(o.recur) ? o.recur.length : 0;
+  bkMsg("Remplacer les coches et les ajouts de cet appareil par cette sauvegarde (" + Object.keys(o.data).length + " mois" + (nr ? ", " + nr + " répétition" + (nr > 1 ? "s" : "") : "") + ") ?<br><button type=\"button\" id=\"bk-yes\" style=\"margin-top:10px\">Oui, remplacer</button>");
+}
+function mergeContenu(o){
+  const old = contenu || {};
+  return Object.assign({}, old, o, {
+    cats:Object.assign({}, old.cats, o.cats),
+    mois:Object.assign({}, old.mois, o.mois),
+    semaines:Object.assign({}, old.semaines, o.semaines),
+    etat:Object.assign({}, old.etat, o.etat)
+  });
+}
+function reloadAll(){ states = {}; loadContenu(); loadRecur(); const c = lsGet("monservice:carryFrom"); if (validYmd(c)) carryFrom = c; carryOver(); render(); }
+$("backup").addEventListener("click", e => {
+  const id = e.target && e.target.id;
+  if (id === "bk-dl"){
+    const blob = new Blob([bkData()], {type:"application/json"}), a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "mon-service-sauvegarde-" + ymd(new Date()) + ".json";
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    bkDone(); bkMsg("Sauvegarde téléchargée.");
+  } else if (id === "bk-cp"){
+    const txt = bkData(), t = $("bk-text");
+    const ok = () => { bkDone(); bkMsg("Sauvegarde copiée : colle-la dans tes Notes."); };
+    const fb = () => { t.value = txt; t.select(); try { document.execCommand("copy"); ok(); } catch(err){ bkMsg("Copie le texte affiché dans la case."); } };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, fb); else fb();
+  } else if (id === "bk-file-btn"){ $("bk-file").click(); }
+  else if (id === "bk-restore"){ bkRestore($("bk-text").value); }
+  else if (id === "ct-btn"){ $("ct-file").click(); }
+  else if (id === "bk-yes" && bkPending){
+    try {
+      const del = [];
+      for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (MONTH_KEY.test(k)) del.push(k); }
+      del.forEach(k => localStorage.removeItem(k));
+    } catch(err){}
+    Object.keys(bkPending.data).forEach(ym => { if (/^\d{4}-\d{2}$/.test(ym)) lsSet(lsKey(ym), JSON.stringify(bkPending.data[ym])); });
+    if (Array.isArray(bkPending.recur)) lsSet("monservice:recur", JSON.stringify(bkPending.recur));
+    if (validYmd(bkPending.carryFrom)) lsSet("monservice:carryFrom", bkPending.carryFrom);
+    if (bkPending.contenu && typeof bkPending.contenu === "object") lsSet("monservice:contenu", JSON.stringify(bkPending.contenu));
+    bkPending = null; reloadAll();
+    bkMsg("Mon service est restauré."); flash("Mon service est restauré");
+  }
+});
+$("bk-file").onchange = e => { const f = e.target.files && e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => bkRestore(r.result); r.readAsText(f); e.target.value = ""; };
+$("ct-file").onchange = e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    let o = null; try { o = JSON.parse(r.result); } catch(err){ o = null; }
+    if (!o || o.app !== "mon-service-contenu"){ bkMsg("Ce fichier n'est pas un fichier de contenu de Mon service."); return; }
+    lsSet("monservice:contenu", JSON.stringify(mergeContenu(o)));
+    reloadAll();
+    bkMsg("Mon fichier de contenu est chargé."); flash("Mon fichier de contenu est chargé");
+  };
+  r.readAsText(f); e.target.value = "";
+};
+
+// ---- Démarrage ----
+goToday();
+const moved0 = carryOver();
 render();
+scrollToToday();
+bkWhen();
+if (moved0) flash(moved0 + (moved0 > 1 ? " tâches reportées" : " tâche reportée") + " à la semaine suivante", 2600);
 </script>
 </body>
 </html>
